@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <title>UVA RDS - Home</title>
+
+  {% load static %}
+
+  <!-- MDB icon -->
+  <link rel="icon" href="{% static 'app/img/uva_logo.png' %}" type="image/x-icon">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.11.2/css/all.css">
+  <!-- Google Fonts Roboto -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap">
+  <!-- Bootstrap core CSS -->
+  <link rel="stylesheet" href="{% static 'app/css/bootstrap.min.css' %}">
+  <!-- Material Design Bootstrap -->
+  <link rel="stylesheet" href="{% static 'app/css/mdb.min.css' %}">
+  <!-- MDBootstrap Datatables  -->
+  <link rel="stylesheet" href="{% static 'app/css/addons/datatables.min.css' %}">
+  <!-- Your custom styles (optional) -->
+  <link rel="stylesheet" href="{% static 'app/css/style.css' %}">
+  <style type="text/css">
+    html,
+    body,
+    header,
+    .view {
+      height: 100%;
+    }
+
+    @media (max-width: 740px) {
+      html,
+      body,
+      header,
+      .view {
+        height: 100vh;
+      }
+    }
+
+    .top-nav-collapse {
+      background-color: #232d4b !important;
+    }
+
+    .navbar:not(.top-nav-collapse) {
+      background: #232d4b !important;
+    }
+
+    @media (max-width: 991px) {
+      .navbar:not(.top-nav-collapse) {
+        background: #232d4b !important;
+      }
+    }
+
+  </style>
+</head>
+<body>
+
+    <header>
+      <!--Navbar-->
+      <nav class="navbar fixed-top navbar-dark" style="background-color: #232d4b;">
+        <a class="navbar-brand" href="{% url 'app:index' %}">
+          Holdings Analysis
+        </a>
+        
+      </nav>
+      <!-- Navbar -->
+      <!-- Full Page Intro -->
+      <div class="view pt-5 grey lighten-4">
+        <!-- Mask & flexbox options-->
+        <div class="align-items-center py-5">
+          <!-- Content -->
+          <div class="container mt-5">
+            <!--Grid row-->
+            <div class="row align-middle">
+              <!--Grid column-->
+              <div class="col-md-12 mb-4 text-center">
+                <h1 class="h1-reponsive mb-0 pt-md-5 pt-5 wow fadeIn" data-wow-delay="0.3s"><strong>ETF Holdings Analysis</strong></h1>
+                
+                <canvas id="myChart"></canvas>
+
+              </div>
+              <!--Grid column-->
+            </div>
+            <!--Grid row-->
+          </div>
+          <!-- Content -->
+        </div>
+        <!-- Mask & flexbox options-->
+      </div>
+      <!-- Full Page Intro -->
+    </header>
+    <!-- Main navigation -->  
+
+  <!-- jQuery -->
+  <script type="text/javascript" src="{% static 'app/js/jquery.min.js' %}"></script>
+  <!-- Bootstrap tooltips -->
+  <script type="text/javascript" src="{% static 'app/js/popper.min.js' %}"></script>
+  <!-- Bootstrap core JavaScript -->
+  <script type="text/javascript" src="{% static 'app/js/bootstrap.min.js' %}"></script>
+  <!-- MDB core JavaScript -->
+  <script type="text/javascript" src="{% static 'app/js/mdb.min.js' %}"></script>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/wow/1.1.2/wow.min.js"></script>
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/web-animations/2.2.2/web-animations.min.js"></script>
+  <!-- Your custom scripts (optional) -->
+  <script type="text/javascript">
+    function createChartDatasets(aggEtfHoldings) {
+      var tickers = Object.keys(aggEtfHoldings);
+      var ret = [];
+      var backgroundColors = ['#D6E9C6', '#FAEBCC', '#EBCCD1']
+      for (var i = 0; i < tickers.length; i++) {
+        var dataPoint = {
+          label: tickers[i],
+          data: [aggEtfHoldings[tickers[i]]],
+          backgroundColor: backgroundColors[i % 3]
+        }
+        ret.push(dataPoint);
+      }
+
+      return ret;
+    }
+
+    function createChart(aggEtfHoldings) {
+      var datasets = createChartDatasets(aggEtfHoldings);
+
+      var ctx = document.getElementById('myChart').getContext('2d');
+      var stackedBar = new Chart(ctx, {
+          type: 'horizontalBar',
+          data: {
+            // labels: ['January'],
+            datasets: datasets,
+          },
+          options: {
+              scales: {
+                  xAxes: [{
+                      stacked: true,
+                      gridLines: {
+                          display:false,  
+                      },
+                  }],
+                  yAxes: [{
+                      stacked: true,
+                  }]
+              },
+              legend:{
+                  display:false
+              },
+          }
+      });
+    }
+
+    $(document).ready(function() {
+      new WOW().init();
+      
+      // Asynchronously fetch and load data
+      $.ajax({
+        // url : "https://onefigrapp.herokuapp.com/app/agg_etf_holdings",
+        url : "http://localhost:8000/app/etf-agg-data",
+        dataType: "json",
+        success : function (data) {
+          var aggEtfHoldings = data;
+          console.log("AJAX aggEtfHoldings");
+          console.log(aggEtfHoldings);
+          createChart(aggEtfHoldings);
+           
+        }
+      });  
+
+    });
+
+    
+  </script>
+
+</body>
+</html>
